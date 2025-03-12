@@ -1,24 +1,59 @@
-pipeline {
+kpipeline {
     agent any
 
+    environment {
+        DOCKER_COMPOSE_DIR = "/home/kali/vuln-ecommerce" // Change if your project is elsewhere
+    }
+
     stages {
-        stage('Pull latest code') {
+        stage('Cleanup Old Containers') {
             steps {
-                git branch: 'main', credentialsId: 'your-jenkins-git-credentials', url: 'https://github.com/Mataizcute/vuln-ecommerce.git'
+                script {
+                    sh '''
+                    echo "Stopping and removing old containers..."
+                    docker stop $(docker ps -aq) || true
+                    docker rm $(docker ps -aq) || true
+                    docker network prune -f || true
+                    '''
+                }
             }
         }
 
-        stage('Build Docker Containers') {
+        stage('Pull Latest Code') {
             steps {
-                sh 'docker-compose down'
-                sh 'docker-compose build'
+                script {
+                    sh '''
+                    echo "Fetching latest code from GitHub..."
+                    cd $DOCKER_COMPOSE_DIR
+                    git reset --hard origin/main
+                    git pull origin main
+                    '''
+                }
             }
         }
 
-        stage('Deploy Containers') {
+        stage('Build and Deploy Docker Containers') {
             steps {
-                sh 'docker-compose up -d'
+                script {
+                    sh '''
+                    echo "Building and deploying Docker containers..."
+                    cd $DOCKER_COMPOSE_DIR
+                    docker-compose down
+                    docker-compose build
+                    docker-compose up -d
+                    '''
+                }
             }
         }
     }
+
+    post {
+        success {
+            echo "✅ Deployment Successful!"
+        }
+        failure {
+            echo "❌ Deployment Failed! Check logs."
+        }
+    }
 }
+

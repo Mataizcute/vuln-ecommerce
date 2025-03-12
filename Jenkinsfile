@@ -2,7 +2,7 @@ kpipeline {
     agent any
 
     environment {
-        DOCKER_COMPOSE_DIR = "/home/kali/vuln-ecommerce" // Change if your project is elsewhere
+        DOCKER_COMPOSE_DIR = "/home/kali/vuln-ecommerce"
     }
 
     stages {

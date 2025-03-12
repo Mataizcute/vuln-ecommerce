@@ -1,4 +1,4 @@
-kpipeline {
+pipeline {
     agent any
 
     environment {
@@ -25,6 +25,7 @@ kpipeline {
                     sh '''
                     echo "Fetching latest code from GitHub..."
                     cd $DOCKER_COMPOSE_DIR
+                    git fetch --all
                     git reset --hard origin/main
                     git pull origin main
                     '''
@@ -49,11 +50,10 @@ kpipeline {
 
     post {
         success {
-            echo "✅ Deployment Successful!"
+            echo " Deployment Successful!"
         }
         failure {
-            echo "❌ Deployment Failed! Check logs."
+            echo " Deployment Failed! Check logs."
         }
     }
 }
-
